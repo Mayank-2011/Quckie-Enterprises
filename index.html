@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quickies - Enterprise Quick Commerce Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Social Authentication Modal -->
+    <div id="social-auth-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Sign In to Quickies</h3>
+                <button class="modal-close" onclick="closeModal('social-auth-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="social-login-section">
+                    <h4>Sign in with your social account</h4>
+                    <div class="social-login-buttons">
+                        <button class="social-btn social-btn--google" onclick="socialLogin('google')">
+                            <i class="fab fa-google"></i>
+                            <span>Continue with Google</span>
+                        </button>
+                        <button class="social-btn social-btn--facebook" onclick="socialLogin('facebook')">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Continue with Facebook</span>
+                        </button>
+                        <button class="social-btn social-btn--apple" onclick="socialLogin('apple')">
+                            <i class="fab fa-apple"></i>
+                            <span>Continue with Apple</span>
+                        </button>
+                    </div>
+                    
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="traditional-auth-buttons">
+                        <button class="btn btn--outline btn--full-width" onclick="showTraditionalLogin()">
+                            <i class="fas fa-envelope"></i>
+                            Sign in with Email
+                        </button>
+                        <button class="btn btn--primary btn--full-width" onclick="showTraditionalRegister()">
+                            <i class="fas fa-user-plus"></i>
+                            Create New Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OAuth Loading Modal -->
+    <div id="oauth-loading-modal" class="modal hidden">
+        <div class="modal-content oauth-loading">
+            <div class="modal-body text-center">
+                <div class="oauth-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <h3 id="oauth-provider-name">Google</h3>
+                <p>Redirecting to authentication...</p>
+                <div class="oauth-progress">
+                    <div class="oauth-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Linking Modal -->
+    <div id="account-linking-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-link"></i> Link Your Account</h3>
+            </div>
+            <div class="modal-body">
+                <p>We found an existing account with this email. Would you like to link your social account?</p>
+                <div class="account-info" id="existing-account-info"></div>
+                <div class="linking-options">
+                    <button class="btn btn--primary btn--full-width" onclick="confirmAccountLinking()">
+                        <i class="fas fa-link"></i>
+                        Link Accounts
+                    </button>
+                    <button class="btn btn--outline btn--full-width" onclick="cancelAccountLinking()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traditional Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sign-in-alt"></i> Sign In</h3>
+                <button class="modal-close" onclick="closeModal('login-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="login-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="login-password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" onclick="showSocialAuthModal()">Back</button>
+                    <button type="submit" class="btn btn--primary">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Traditional Register Modal -->
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Create Account</h3>
+                <button class="modal-close" onclick="closeModal('register-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="register-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="register-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="register-password" required>
+                        <div class="password-strength" id="password-strength"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" onclick="showSocialAuthModal()">Back</button>
+                    <button type="submit" class="btn btn--primary">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Tracking Modal -->
+    <div id="order-tracking-modal" class="modal hidden">
+        <div class="modal-content modal-content--large">
+            <div class="modal-header">
+                <h3><i class="fas fa-truck"></i> Track Your Order</h3>
+                <button class="modal-close" onclick="closeModal('order-tracking-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tracking-header" id="tracking-header"></div>
+                <div class="tracking-progress" id="tracking-progress"></div>
+                <div class="tracking-map" id="tracking-map"></div>
+                <div class="driver-info" id="driver-info"></div>
+                <div class="tracking-history" id="tracking-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <div class="landing-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <i class="fas fa-bolt"></i>
+                            Quickies
+                        </h1>
+                        <h2 class="hero-subtitle">Enterprise Quick Commerce</h2>
+                        <p class="hero-description">Experience enterprise-grade grocery delivery with social authentication, role-based access control, and real-time tracking. Built for businesses that demand reliability and security.</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn--primary btn--lg" onclick="showShop()">
+                                <i class="fas fa-shopping-cart"></i>
+                                Start Shopping
+                            </button>
+                            <button class="btn btn--outline btn--lg" id="admin-access-btn" onclick="showAdminLogin()">
+                                <i class="fas fa-shield-alt"></i>
+                                Admin Access
+                            </button>
+                        </div>
+                        <div class="auth-buttons">
+                            <button class="btn btn--secondary" onclick="showSocialAuthModal()">
+                                <i class="fas fa-user"></i>
+                                Sign In
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-features">
+                        <div class="feature-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Enterprise Security</h3>
+                            <p>Role-based access control and secure authentication</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-users"></i>
+                            <h3>Social Login</h3>
+                            <p>Google, Facebook, and Apple ID integration</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-truck"></i>
+                            <h3>Real-time Tracking</h3>
+                            <p>GPS-enabled delivery tracking and notifications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Shop -->
+    <div id="shop-page" class="page">
+        <header class="shop-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo" onclick="showLanding()">
+                        <i class="fas fa-bolt"></i>
+                        <span>Quickies</span>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="product-search" placeholder="Search products..." oninput="filterProducts()">
+                    </div>
+                    <div class="header-actions">
+                        <div class="user-menu" id="user-menu">
+                            <div class="user-greeting hidden" id="user-greeting">
+                                <div class="user-avatar" id="user-avatar"></div>
+                                <div class="user-info">
+                                    <span>Hello, <span id="user-name-display"></span>!</span>
+                                    <div class="user-role" id="user-role-display"></div>
+                                </div>
+                                <div class="user-dropdown">
+                                    <button class="dropdown-btn" onclick="toggleUserDropdown()">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu hidden" id="user-dropdown">
+                                        <a href="#" onclick="showProfileModal()"><i class="fas fa-user"></i> My Profile</a>
+                                        <a href="#" onclick="showOrderHistory()"><i class="fas fa-history"></i> Order History</a>
+                                        <a href="#" onclick="showWishlist()"><i class="fas fa-heart"></i> Wishlist</a>
+                                        <div id="admin-menu-item" class="hidden">
+                                            <hr>
+                                            <a href="#" onclick="showAdminLogin()"><i class="fas fa-cog"></i> Admin Panel</a>
+                                        </div>
+                                        <hr>
+                                        <a href="#" onclick="userLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="auth-buttons-header" id="auth-buttons-header">
+                                <button class="btn btn--primary btn--sm" onclick="showSocialAuthModal()">
+                                    <i class="fas fa-user"></i>
+                                    Sign In
+                                </button>
+                            </div>
+                        </div>
+                        <button class="cart-btn" onclick="toggleCart()">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="cart-count">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="shop-container">
+            <div class="container">
+                <div class="shop-layout">
+                    <aside class="categories-sidebar">
+                        <h3>Categories</h3>
+                        <div class="category-filters" id="category-filters">
+                            <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">
+                                <i class="fas fa-th-large"></i>
+                                All Products
+                            </button>
+                        </div>
+                    </aside>
+
+                    <main class="products-section">
+                        <div class="section-header">
+                            <h2 id="products-title">All Products</h2>
+                            <span class="product-count" id="product-count">0 items</span>
+                        </div>
+                        <div class="products-grid" id="products-grid"></div>
+                    </main>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopping Cart Sidebar -->
+        <div id="cart-sidebar" class="cart-sidebar">
+            <div class="cart-header">
+                <h3><i class="fas fa-shopping-cart"></i> Shopping Cart</h3>
+                <button class="close-cart" onclick="toggleCart()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Your cart is empty</p>
+                </div>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total" id="cart-total">
+                    <strong>Total: $0.00</strong>
+                </div>
+                <button class="btn btn--primary btn--full-width" id="checkout-btn" onclick="showCheckout()" disabled>
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Page -->
+    <div id="checkout-page" class="page">
+        <header class="simple-header">
+            <div class="container">
+                <div class="header-content">
+                    <button class="btn btn--outline btn--sm" onclick="showShop()">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Shop
+                    </button>
+                    <h1>Secure Checkout</h1>
+                </div>
+            </div>
+        </header>
+        <div class="checkout-container">
+            <div class="container">
+                <div class="checkout-layout">
+                    <div class="checkout-form-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Order Information</h3>
+                                <form id="checkout-form">
+                                    <div class="form-group">
+                                        <label class="form-label">Full Name *</label>
+                                        <input type="text" class="form-control" id="customer-name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Number *</label>
+                                        <input type="tel" class="form-control" id="customer-phone" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Delivery Address *</label>
+                                        <textarea class="form-control" id="delivery-address" rows="2" required placeholder="Enter your complete delivery address"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Delivery Instructions (Optional)</label>
+                                        <textarea class="form-control" id="delivery-instructions" rows="2" placeholder="e.g., Ring doorbell, Leave at door..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn--primary btn--full-width">
+                                        <i class="fas fa-credit-card"></i>
+                                        Place Order
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-summary-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Order Summary</h3>
+                                <div id="checkout-items"></div>
+                                <div class="order-totals">
+                                    <div class="total-row">
+                                        <span>Subtotal:</span>
+                                        <span id="checkout-subtotal">$0.00</span>
+                                    </div>
+                                    <div class="total-row">
+                                        <span>Delivery Fee:</span>
+                                        <span id="checkout-delivery">$2.99</span>
+                                    </div>
+                                    <div class="total-row total-final">
+                                        <strong>Total: <span id="checkout-total">$0.00</span></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="admin-login" class="page">
+        <div class="login-container">
+            <div class="container">
+                <div class="login-card">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="login-header">
+                                <h2><i class="fas fa-shield-alt"></i> Admin Access</h2>
+                                <p>Secure enterprise dashboard access</p>
+                                <div class="security-notice">
+                                    <i class="fas fa-lock"></i>
+                                    <small>Multi-factor authentication enabled</small>
+                                </div>
+                            </div>
+                            <form id="admin-login-form">
+                                <div class="form-group">
+                                    <label class="form-label">Admin Email</label>
+                                    <input type="email" class="form-control" id="admin-email" placeholder="admin@quickies.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="admin-password" placeholder="Enter admin password">
+                                </div>
+                                <div class="login-attempts" id="login-attempts"></div>
+                                <button type="submit" class="btn btn--primary btn--full-width" id="admin-login-btn">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Secure Access
+                                </button>
+                                <button type="button" class="btn btn--outline btn--full-width" onclick="showLanding()">
+                                    Back to Home
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="page">
+        <header class="admin-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Quickies Enterprise</span>
+                    </div>
+                    <nav class="admin-nav" id="admin-nav">
+                        <button class="nav-btn active" onclick="showDashboardSection('overview')">
+                            <i class="fas fa-chart-dashboard"></i>
+                            Dashboard
+                        </button>
+                        <button class="nav-btn" onclick="showDashboardSection('users')">
+                            <i class="fas fa-users"></i>
+                            Users
+                        </button>
+                        <button class="nav-btn" onclick="showDashboardSection('orders')">
+                            <i class="fas fa-shopping-bag"></i>
+                            Orders
+                        </button>
+                        <button class="nav-btn" onclick="showDashboardSection('delivery')">
+                            <i class="fas fa-truck"></i>
+                            Delivery
+                        </button>
+                        <button class="nav-btn" onclick="showDashboardSection('security')">
+                            <i class="fas fa-shield-alt"></i>
+                            Security
+                        </button>
+                    </nav>
+                    <div class="admin-actions">
+                        <div class="admin-user-info" id="admin-user-info">
+                            <span id="admin-user-name">Admin</span>
+                            <span id="admin-user-role">Super Admin</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" onclick="adminLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-container">
+            <div class="container">
+                <!-- Dashboard Overview -->
+                <div id="admin-overview" class="admin-section active">
+                    <div class="section-header">
+                        <h2>Enterprise Dashboard</h2>
+                        <p>Monitor platform performance and manage operations</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-content">
+                                <h3 id="total-users">0</h3>
+                                <p>Active Users</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                            <div class="stat-content">
+                                <h3 id="total-orders">0</h3>
+                                <p>Total Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-truck"></i></div>
+                            <div class="stat-content">
+                                <h3 id="active-deliveries">0</h3>
+                                <p>Active Deliveries</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="stat-content">
+                                <h3 id="total-revenue">$0</h3>
+                                <p>Revenue</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-activity" id="recent-activity"></div>
+                </div>
+
+                <!-- Users Management -->
+                <div id="admin-users" class="admin-section">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <p>Manage users and role assignments</p>
+                    </div>
+                    <div class="admin-table" id="users-table"></div>
+                </div>
+
+                <!-- Orders Management -->
+                <div id="admin-orders" class="admin-section">
+                    <div class="section-header">
+                        <h2>Order Management</h2>
+                        <p>Track and manage all orders</p>
+                    </div>
+                    <div class="admin-table" id="orders-table"></div>
+                </div>
+
+                <!-- Delivery Management -->
+                <div id="admin-delivery" class="admin-section">
+                    <div class="section-header">
+                        <h2>Delivery Management</h2>
+                        <p>Monitor live deliveries and drivers</p>
+                    </div>
+                    <div class="delivery-dashboard" id="delivery-dashboard"></div>
+                </div>
+
+                <!-- Security Management -->
+                <div id="admin-security" class="admin-section">
+                    <div class="section-header">
+                        <h2>Security & Access Control</h2>
+                        <p>Manage RBAC and audit logs</p>
+                    </div>
+                    <div class="security-dashboard" id="security-dashboard"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="order-confirmation" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Order Placed Successfully!</h3>
+                <p>Your order has been received and is being processed.</p>
+                <p>Order ID: <strong id="order-id"></strong></p>
+                <p>Tracking Number: <strong id="tracking-number"></strong></p>
+                <div class="delivery-estimate">
+                    <i class="fas fa-clock"></i>
+                    <span>Estimated delivery: 25-35 minutes</span>
+                </div>
+                <div class="order-actions">
+                    <button class="btn btn--primary" onclick="trackOrder()">
+                        <i class="fas fa-truck"></i>
+                        Track Order
+                    </button>
+                    <button class="btn btn--outline" onclick="closeOrderConfirmation()">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Assignment Modal -->
+    <div id="role-assignment-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-shield"></i> Assign Role</h3>
+                <button class="modal-close" onclick="closeModal('role-assignment-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="role-assignment-form">
+                    <div class="user-info" id="role-assignment-user"></div>
+                    <div class="form-group">
+                        <label class="form-label">Select Role</label>
+                        <select class="form-control" id="role-select">
+                            <option value="customer">Customer</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Administrator</option>
+                            <option value="super_admin">Super Administrator</option>
+                        </select>
+                    </div>
+                    <div class="role-permissions" id="role-permissions"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--outline" onclick="closeModal('role-assignment-modal')">Cancel</button>
+                <button class="btn btn--primary" onclick="updateUserRole()">Update Role</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <div class="toast-icon" id="toast-icon"></div>
+            <div class="toast-message" id="toast-message"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
